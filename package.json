@@ -9,7 +9,8 @@
     "test": "jest",
     "start": "electron main.js",
     "pack": "electron-builder --dir",
-    "dist": "electron-builder"
+    "dist": "electron-builder -h",
+    "dist-win": "electron-builder --win --x64"
   },
   "build": {
     "appId": "com.namle.wave_tool",
