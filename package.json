@@ -1,0 +1,58 @@
+{
+  "name": "WaveTool",
+  "version": "1.0.0",
+  "description": "A simple Electron application",
+  "main": "main.js",
+  "type": "module",
+  "scripts": {
+    "electron": "electron .",
+    "test": "jest",
+    "start": "electron main.js",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder"
+  },
+  "build": {
+    "appId": "com.namle.wave_tool",
+    "dmg": {
+      "contents": [
+        {
+          "x": 110,
+          "y": 150
+        },
+        {
+          "x": 240,
+          "y": 150,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ]
+    },
+    "win": {
+      "target": "NSIS",
+      "icon": "build/icon.ico"
+    }
+  },
+  "author": "Nam Le",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^28.3.1",
+    "electron-builder": "^21.2.0"
+  },
+  "dependencies": {
+    "@mysten/sui.js": "^0.54.1",
+    "@okxweb3/coin-sui": "^1.0.3",
+    "bootstrap": "4.3.1",
+    "city-timezones": "github:kevinroberts/city-timezones#master",
+    "font-awesome": "4.7.0",
+    "jquery": "3.4.1",
+    "moment-timezone": "0.5.26",
+    "node-fetch": "^3.3.2",
+    "node-notifier": "5.4.0"
+  }
+}

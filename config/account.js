@@ -1,4 +1,4 @@
-import { parse } from "csv-parse/.";
+import fetch from "node-fetch";
 
 export const level2List = [
   "0x3a1520d5ac44e51c645e238e4f268e72b1a8fec2712fec038100db83757fddda",
@@ -17,14 +17,25 @@ export const level2List = [
 ];
 
 export const dieList = [];
-const accountList = [];
+let accountList = [];
 
-export const getAccountList = async() => {
-  if(accountList) return accountList
-  const parser = parse({
-    delimiter: ','
-  });
-}
+export const getAccountList = async () => {
+  if (accountList.length > 0) return accountList;
+  const resp = await fetch(
+    "https://raw.githubusercontent.com/namlt2882/wave-management-tool/master/config/address.csv",
+    { method: "GET" }
+  );
+  const addressCsv = await resp.text();
+  const [_, ...data] = addressCsv.split("\n");
+  accountList = data
+    .map((val) => val.split(","))
+    .map(([id, address, lv]) => ({
+      id: id.trim(),
+      address: address.trim(),
+      lv: parseInt(lv.trim()),
+    }));
+  return accountList;
+};
 
 export const isLevel2 = (address) => level2List.find((val) => val == address);
 export const isAccountDied = (address) => dieList.find((val) => val == address);
