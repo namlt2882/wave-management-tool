@@ -34,6 +34,10 @@ async function refreshAddressStatus() {
         val.lastClaimDate = await getLatestClaimDate(val.address);
         if (val.lastClaimDate) {
           val.lastClaimDateStr = val.lastClaimDate.toLocaleString();
+          val.nextTime = new Date(val.lastClaimDate);
+          val.nextTime.setHours(val.nextTime.getHours() + 2)
+          val.nextTime -= new Date()
+          val.nextTimeStr = `${((val.nextTime / 1_000_000) * 60).toFixed(0)} phút`;
           val.onTime = new Date() - val.lastClaimDate < TWO_HOUR;
         } else {
           val.onTime = true;
@@ -49,11 +53,11 @@ async function refreshAddressStatus() {
       const ableToUpLvlB = b.ableToUpLvl;
       if (!ableToUpLvlA && ableToUpLvlB) return 1;
       if (ableToUpLvlA && !ableToUpLvlB) return -1;
-      return a.index - b.index;
+      return a.nextTime - b.nextTime;
     }
     if (!ontimeA && ontimeB) return -1;
     if (ontimeA && !ontimeB) return 1;
-    if (!ontimeA && !ontimeB) return a.lastClaimDate - b.lastClaimDate;
+    if (!ontimeA && !ontimeB) return a.nextTime - b.nextTime;
   });
 
   return accountData;

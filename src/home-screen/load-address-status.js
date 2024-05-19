@@ -63,6 +63,7 @@ function onDataLoaded(addressStatusList) {
         <th>GAS</th>
         <th>OCEAN</th>
         <th>Claim lần cuối</th>
+        <th>Thời gian claim tiếp theo</th>
         <th>Ghi chú</th>
         </tr>`),
         ...addressStatusList.map((addressStatus) =>
@@ -94,7 +95,7 @@ function onDataLoaded(addressStatusList) {
 }
 
 function renderResult(addressStatus) {
-  const { id, address, lv, sui, ocean, onTime, ableToUpLvl, lastClaimDateStr } =
+  const { id, address, lv, sui, ocean, onTime, ableToUpLvl, lastClaimDateStr, nextTimeStr } =
     addressStatus;
   let style = "",
     note = "";
@@ -112,6 +113,7 @@ function renderResult(addressStatus) {
   <td>${sui.toFixed(3)}</td>
   <td>${ocean.toFixed(3)}</td>
   <td>${lastClaimDateStr}</td>
+  <td>${nextTimeStr}</td>
   <td>${note}</td>
   </tr>`);
   content.first(`i`).on("click", () => {
