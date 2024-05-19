@@ -17,7 +17,15 @@ async function refreshAddressStatus() {
             getCurrentSui(address),
             getCurrentOcean(address),
           ]);
-          return { index, id, address, lv, sui, ocean };
+          return {
+            index,
+            id,
+            address,
+            lv,
+            sui,
+            ocean,
+            ableToUpLvl: lv == 1 && ocean >= 20,
+          };
         })
       )
     )
@@ -36,7 +44,13 @@ async function refreshAddressStatus() {
   accountData.sort((a, b) => {
     const ontimeA = a.onTime;
     const ontimeB = b.onTime;
-    if (ontimeA && ontimeB) return a.index - b.index;
+    if (ontimeA && ontimeB) {
+      const ableToUpLvlA = a.ableToUpLvl;
+      const ableToUpLvlB = b.ableToUpLvl;
+      if (!ableToUpLvlA && ableToUpLvlB) return 1;
+      if (ableToUpLvlA && !ableToUpLvlB) return -1;
+      return a.index - b.index;
+    }
     if (!ontimeA && ontimeB) return -1;
     if (ontimeA && !ontimeB) return 1;
     if (!ontimeA && !ontimeB) return a.lastClaimDate - b.lastClaimDate;

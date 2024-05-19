@@ -3,8 +3,10 @@ import { app, BrowserWindow, ipcMain, Menu, MenuItem } from "electron";
 import url, { fileURLToPath } from "url";
 import path from "path";
 import { setup } from "./src/home-screen/load-address-status.bg.js";
+import Toaster from "electron-toaster";
 
 let window;
+var toaster = new Toaster();
 
 function createWindow() {
   window = new BrowserWindow({
@@ -13,6 +15,7 @@ function createWindow() {
       contextIsolation: false,
     },
   });
+  toaster.init(window);
 //   window.webContents.openDevTools();
   setup();
   const __filename = fileURLToPath(import.meta.url);

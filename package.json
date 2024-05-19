@@ -50,6 +50,7 @@
     "@okxweb3/coin-sui": "^1.0.3",
     "bootstrap": "4.3.1",
     "city-timezones": "github:kevinroberts/city-timezones#master",
+    "electron-toaster": "^2.0.4",
     "font-awesome": "4.7.0",
     "jquery": "3.4.1",
     "moment-timezone": "0.5.26",

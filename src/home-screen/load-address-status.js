@@ -1,48 +1,122 @@
 let $ = require("jquery");
-let { ipcRenderer } = require("electron");
-let snippets = [];
+let { ipcRenderer, clipboard } = require("electron");
 let searchData = [];
 
 function onDataLoaded(addressStatusList) {
   var resultArea = $("#address-table");
   resultArea.html(null);
-  snippets = [];
   searchData = addressStatusList;
+  const {
+    totalAccount,
+    totalActive,
+    totalLate,
+    totalUpLvl,
+    totalLv1,
+    totalLv2,
+    totalSui,
+    totalOcean,
+  } = addressStatusList.reduce(
+    (acc, { lv, sui, ocean, onTime, ableToUpLvl }) => {
+      acc.totalAccount += 1;
+      if (onTime) {
+        acc.totalActive += 1;
+      } else {
+        acc.totalLate += 1;
+      }
+      if (ableToUpLvl) {
+        acc.totalUpLvl += 1;
+      }
+      switch (lv) {
+        case 2:
+          acc.totalLv2 += 1;
+          break;
+        default:
+          acc.totalLv1 += 1;
+          break;
+      }
+      acc.totalSui += sui;
+      acc.totalOcean += ocean;
+      return acc;
+    },
+    {
+      totalAccount: 0,
+      totalActive: 0,
+      totalLate: 0,
+      totalUpLvl: 0,
+      totalLv1: 0,
+      totalLv2: 0,
+      totalSui: 0,
+      totalOcean: 0,
+    }
+  );
   if (addressStatusList.length == 0) {
-    resultArea.html(`<div>Không có acc nào bị delay</div>`);
+    resultArea.html(`<div>Cập nhật lần cuối vào lúc ${new Date().toLocaleString()}</div>
+    <div>Không thấy acc nào</div>`);
   } else {
     resultArea.html([
       $(`<div>Cập nhật lần cuối vào lúc ${new Date().toLocaleString()}</div>`),
-      $(`<table/>`).html([
+      $(`<table id="main-table" border="1"/>`).html([
         $(`<tr>
         <th>ID</th>
         <td>Địa chỉ</th>
         <th>Level mèo</th>
         <th>GAS</th>
         <th>OCEAN</th>
-        <th>Trễ?</th>
         <th>Claim lần cuối</th>
+        <th>Ghi chú</th>
         </tr>`),
         ...addressStatusList.map((addressStatus) =>
           renderResult(addressStatus)
         ),
       ]),
     ]);
+    $("#statistic").html(`
+    <table>
+      <tr>
+        <th>Acc đang sống:</th>
+        <td>${totalActive}/${totalAccount}</td>
+      </tr>
+      <tr>
+        <th>Acc trễ:</th>
+        <td>${totalLate}/${totalAccount}</td>
+      </tr>
+      <tr>
+        <th>Số lượng mèo:</th>
+        <td>Lv2=${totalLv2} Lv1=${totalLv1} (Có thể nâng ${totalUpLvl} acc)</td>
+      </tr>
+      <tr>
+        <th>Số lượng coin:</th>
+        <td>SUI=${totalSui.toFixed(3)} OCEAN=${totalOcean.toFixed(3)}</td>
+      </tr>
+    </table>
+    `);
   }
 }
 
 function renderResult(addressStatus) {
-  const { id, address, lv, sui, ocean, onTime, lastClaimDateStr } =
+  const { id, address, lv, sui, ocean, onTime, ableToUpLvl, lastClaimDateStr } =
     addressStatus;
-  var content = $(`<tr style="${onTime ? "" : "background: red; color: white"}">
+  let style = "",
+    note = "";
+  if (!onTime) {
+    style = "background: red; color: white";
+    note = "Trễ";
+  } else if (ableToUpLvl) {
+    style = "background: green; color: white";
+    note = "Có thể nâng mèo";
+  }
+  var content = $(`<tr style="${style}">
   <td>${id}</td>
-  <td>${address}</td>
+  <td>${address} <i class="fa fa-copy"></i></td>
   <td>${lv}</td>
-  <td>${sui}</td>
-  <td>${ocean}</td>
-  <td>${onTime ? "" : "Trễ"}</td>
+  <td>${sui.toFixed(3)}</td>
+  <td>${ocean.toFixed(3)}</td>
   <td>${lastClaimDateStr}</td>
+  <td>${note}</td>
   </tr>`);
+  content.first(`i`).on("click", () => {
+    clipboard.writeText(address);
+  });
   return content;
 }
 
@@ -55,6 +129,11 @@ $(function () {
   console.log(loadButton);
   loadButton.on("click", () => {
     ipcRenderer.send("load-address-status");
+    ipcRenderer.send("electron-toaster-message", {
+      message:
+        "Check this out!<br>Check this out!<br>Check this out!<br>Check this out!<br>Check this out!<br>Check this out!<br>",
+      detail: "Copied",
+    });
   });
 });
 ipcRenderer.on("load-address-status", (event, data) => {

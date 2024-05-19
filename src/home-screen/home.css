@@ -82,3 +82,7 @@
 #address-table .address-table:hover .untrack-timezone {
   opacity: 1;
 }
+
+#address-table #main-table th, td {
+  text-align: center;
+}
