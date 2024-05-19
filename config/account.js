@@ -29,8 +29,9 @@ export const getAccountList = async () => {
   const [_, ...data] = addressCsv.split("\n");
   accountList = data
     .map((val) => val.split(","))
-    .map(([id, address, lv]) => ({
+    .map(([id, teleid, address, lv]) => ({
       id: id.trim(),
+      teleid: teleid.trim(),
       address: address.trim(),
       lv: parseInt(lv.trim()),
     }));

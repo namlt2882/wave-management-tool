@@ -5,7 +5,6 @@ function onDataLoaded(addressStatusList) {
   var resultArea = $("#address-table");
   resultArea.html(null);
   const {
-    totalAccount,
     totalActive,
     totalLate,
     totalUpLvl,
@@ -15,7 +14,6 @@ function onDataLoaded(addressStatusList) {
     totalOcean,
   } = addressStatusList.reduce(
     (acc, { lv, sui, ocean, onTime, ableToUpLvl }) => {
-      acc.totalAccount += 1;
       if (onTime) {
         acc.totalActive += 1;
       } else {
@@ -37,7 +35,6 @@ function onDataLoaded(addressStatusList) {
       return acc;
     },
     {
-      totalAccount: 0,
       totalActive: 0,
       totalLate: 0,
       totalUpLvl: 0,
@@ -56,7 +53,8 @@ function onDataLoaded(addressStatusList) {
       $(`<table id="main-table" border="1"/>`).html([
         $(`<tr>
         <th>ID</th>
-        <td>Địa chỉ</th>
+        <th>TeleID</th>
+        <th>Địa chỉ</th>
         <th>Level mèo</th>
         <th>GAS</th>
         <th>OCEAN</th>
@@ -73,11 +71,11 @@ function onDataLoaded(addressStatusList) {
     <table>
       <tr>
         <th>Acc đang sống:</th>
-        <td>${totalActive}/${totalAccount}</td>
+        <td>${totalActive}/${addressStatusList.length}</td>
       </tr>
       <tr>
         <th>Acc trễ:</th>
-        <td>${totalLate}/${totalAccount}</td>
+        <td>${totalLate}/${addressStatusList.length}</td>
       </tr>
       <tr>
         <th>Số lượng mèo:</th>
@@ -95,6 +93,7 @@ function onDataLoaded(addressStatusList) {
 function renderResult(addressStatus) {
   const {
     id,
+    teleid,
     address,
     lv,
     sui,
@@ -115,6 +114,7 @@ function renderResult(addressStatus) {
   }
   var content = $(`<tr style="${style}">
   <td>${id}</td>
+  <td>${teleid}</td>
   <td>${address} <i class="fa fa-copy"></i></td>
   <td>${lv}</td>
   <td>${sui.toFixed(3)}</td>
