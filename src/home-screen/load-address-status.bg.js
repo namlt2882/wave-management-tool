@@ -35,9 +35,10 @@ async function refreshAddressStatus() {
         if (val.lastClaimDate) {
           val.lastClaimDateStr = val.lastClaimDate.toLocaleString();
           val.nextTime = new Date(val.lastClaimDate);
-          val.nextTime.setHours(val.nextTime.getHours() + 2)
-          val.nextTime -= new Date()
-          val.nextTimeStr = `${((val.nextTime / 1_000_000) * 60).toFixed(0)} phút`;
+          val.nextTime.setHours(val.nextTime.getHours() + 2);
+          val.nextTime -= new Date();
+          val.nextTime = (Math.abs(val.nextTime) / 36e5) * 60;
+          val.nextTimeStr = `${val.nextTime.toFixed(0)} phút`;
           val.onTime = new Date() - val.lastClaimDate < TWO_HOUR;
         } else {
           val.onTime = true;
@@ -57,7 +58,7 @@ async function refreshAddressStatus() {
     }
     if (!ontimeA && ontimeB) return -1;
     if (ontimeA && !ontimeB) return 1;
-    if (!ontimeA && !ontimeB) return a.nextTime - b.nextTime;
+    if (!ontimeA && !ontimeB) return b.nextTime - a.nextTime;
   });
 
   return accountData;

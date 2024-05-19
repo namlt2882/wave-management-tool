@@ -1,4 +1,3 @@
-import { TransactionBlock } from "@okxweb3/coin-sui";
 import { OCEAN_COINTYPE, SUI_COINTYPE, client } from "../../config/network.js";
 
 export const getBalance = async (address, coinType) => {
@@ -48,88 +47,6 @@ export const getCoin = async (address) => {
     limit: 500,
   });
   return coins.data;
-};
-
-export const getGasPerSendTx = async () => {
-  const gasPrice = await client.getReferenceGasPrice();
-  const gasBudget = (gasPrice * 10_000n) / 1_000_000_000n;
-  return Number(gasBudget);
-};
-
-export const sendCoin = async (
-  coinType,
-  sender = { address: "", privateKey: "", keyPair: null },
-  receiverAddress,
-  amount
-) => {
-  const suiCoins = await getCoin(sender.address);
-  const tx = new TransactionBlock();
-  const finalAmount = parseInt(amount * 1_000_000_000);
-
-  const gasPrice = await client.getReferenceGasPrice();
-  const gasBudget = gasPrice * 10_000n;
-  tx.setGasBudget(gasBudget);
-  tx.setGasPrice(gasPrice);
-  tx.setGasPayment(
-    suiCoins.map((coin) => ({
-      version: coin.version,
-      digest: coin.digest,
-      objectId: coin.coinObjectId,
-    }))
-  );
-  if (coinType == SUI_COINTYPE) {
-    tx.setGasPayment(
-      suiCoins.map((coin) => ({
-        version: coin.version,
-        digest: coin.digest,
-        objectId: coin.coinObjectId,
-      }))
-    );
-    const [coinIn] = tx.splitCoins(tx.gas, [tx.pure(finalAmount)]); // lấy phần cần chuyển
-    tx.transferObjects([coinIn], tx.pure(receiverAddress, "address")); // chuyển đến người nhận
-  } else {
-    const coins = await getCoinType(sender.address, coinType);
-    if (!coins) {
-      console.log("[ERR] no coin found");
-      return null;
-    }
-    const [primaryCoinX, ...restCoinXs] = coins;
-    tx.mergeCoins(
-      tx.object(primaryCoinX.coinObjectId),
-      restCoinXs.map((coin) => tx.object(coin.coinObjectId))
-    );
-    const [coinIn] = tx.splitCoins(tx.object(primaryCoinX.coinObjectId), [
-      tx.pure(finalAmount),
-    ]);
-    tx.transferObjects([coinIn], tx.pure(receiverAddress, "address"));
-  }
-
-  let rs = await client.signAndExecuteTransactionBlock({
-    transactionBlock: tx,
-    signer: sender.keyPair,
-    requestType: "WaitForLocalExecution",
-    options: {
-      showBalanceChanges: true,
-      showEffects: true,
-    },
-  });
-  return rs;
-};
-
-export const sendSui = async (
-  sender = { address: "", privateKey: "" },
-  receiverAddress,
-  amount
-) => {
-  return await sendCoin(SUI_COINTYPE, sender, receiverAddress, amount);
-};
-
-export const sendOcean = async (
-  sender = { address: "", privateKey: "" },
-  receiverAddress,
-  amount
-) => {
-  return await sendCoin(OCEAN_COINTYPE, sender, receiverAddress, amount);
 };
 
 export const getLatestClaimTx = async (address, cursor) => {

@@ -1,11 +1,9 @@
 let $ = require("jquery");
 let { ipcRenderer, clipboard } = require("electron");
-let searchData = [];
 
 function onDataLoaded(addressStatusList) {
   var resultArea = $("#address-table");
   resultArea.html(null);
-  searchData = addressStatusList;
   const {
     totalAccount,
     totalActive,
@@ -95,13 +93,22 @@ function onDataLoaded(addressStatusList) {
 }
 
 function renderResult(addressStatus) {
-  const { id, address, lv, sui, ocean, onTime, ableToUpLvl, lastClaimDateStr, nextTimeStr } =
-    addressStatus;
+  const {
+    id,
+    address,
+    lv,
+    sui,
+    ocean,
+    onTime,
+    ableToUpLvl,
+    lastClaimDateStr,
+    nextTimeStr,
+  } = addressStatus;
   let style = "",
     note = "";
   if (!onTime) {
     style = "background: red; color: white";
-    note = "Trễ";
+    note = "Trễ " + nextTimeStr;
   } else if (ableToUpLvl) {
     style = "background: green; color: white";
     note = "Có thể nâng mèo";
@@ -113,7 +120,7 @@ function renderResult(addressStatus) {
   <td>${sui.toFixed(3)}</td>
   <td>${ocean.toFixed(3)}</td>
   <td>${lastClaimDateStr}</td>
-  <td>${nextTimeStr}</td>
+  <td>${onTime ? nextTimeStr : ""}</td>
   <td>${note}</td>
   </tr>`);
   content.first(`i`).on("click", () => {
@@ -131,11 +138,6 @@ $(function () {
   console.log(loadButton);
   loadButton.on("click", () => {
     ipcRenderer.send("load-address-status");
-    ipcRenderer.send("electron-toaster-message", {
-      message:
-        "Check this out!<br>Check this out!<br>Check this out!<br>Check this out!<br>Check this out!<br>Check this out!<br>",
-      detail: "Copied",
-    });
   });
 });
 ipcRenderer.on("load-address-status", (event, data) => {
