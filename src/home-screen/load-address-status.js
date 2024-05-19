@@ -56,6 +56,7 @@ function onDataLoaded(addressStatusList) {
         <th>TeleID</th>
         <th>Địa chỉ</th>
         <th>Level mèo</th>
+        <th>Level cua</th>
         <th>GAS</th>
         <th>OCEAN</th>
         <th>Claim lần cuối</th>
@@ -96,6 +97,7 @@ function renderResult(addressStatus) {
     teleid,
     address,
     lv,
+    multiple,
     sui,
     ocean,
     onTime,
@@ -110,13 +112,14 @@ function renderResult(addressStatus) {
     note = "Trễ " + nextTimeStr;
   } else if (ableToUpLvl) {
     style = "background: green; color: white";
-    note = "Có thể nâng mèo";
+    note = `Có thể nâng mèo ${lv + 1}`;
   }
   var content = $(`<tr style="${style}">
   <td>${id}</td>
   <td>${teleid}</td>
   <td>${address} <i class="fa fa-copy"></i></td>
   <td>${lv}</td>
+  <td>${multiple}</td>
   <td>${sui.toFixed(3)}</td>
   <td>${ocean.toFixed(3)}</td>
   <td>${lastClaimDateStr}</td>

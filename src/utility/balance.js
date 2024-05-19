@@ -1,4 +1,9 @@
-import { OCEAN_COINTYPE, SUI_COINTYPE, client } from "../../config/network.js";
+import {
+  EVENT_TYPE_UPGRADE_LEVEL,
+  OCEAN_COINTYPE,
+  SUI_COINTYPE,
+  client,
+} from "../../config/network.js";
 
 export const getBalance = async (address, coinType) => {
   const balance = await client.getBalance({ owner: address, coinType });
@@ -70,7 +75,51 @@ export const getLatestClaimTx = async (address, cursor) => {
       );
     })
     .sort((a, b) => parseInt(b.timestampMs) - parseInt(a.timestampMs));
-  if (filterData.length > 0) return new Date(parseInt(filterData[0].timestampMs));
-  if (tx.hasNextPage) return await getLatestClaimTx(address, tx.nextCursor)
-  return null
+  if (filterData.length > 0)
+    return new Date(parseInt(filterData[0].timestampMs));
+  if (tx.hasNextPage) return await getLatestClaimTx(address, tx.nextCursor);
+  return null;
+};
+
+export const getAccountLevelAndMultiple = async (
+  address,
+  cursor,
+  level = 1,
+  multiple = 1
+) => {
+  const txs = await client.queryTransactionBlocks({
+    limit: 500,
+    filter: {
+      FromAddress: address,
+    },
+    cursor,
+    options: {
+      showEvents: true,
+    },
+  });
+  const upgradeLevelTxs = txs.data.filter((block) => {
+    return block.events.find(
+      (event) =>
+        event.type == EVENT_TYPE_UPGRADE_LEVEL &&
+        event.transactionModule == "game" &&
+        event.parsedJson.type === 1
+    );
+  });
+  if (upgradeLevelTxs.length > 0) level += upgradeLevelTxs.length;
+  const upgradeMultipleTxs = txs.data.filter((block) => {
+    return block.events.find(
+      (event) =>
+        event.type == EVENT_TYPE_UPGRADE_LEVEL &&
+        event.transactionModule == "box"
+    );
+  });
+  if (upgradeMultipleTxs.length > 0) multiple += upgradeMultipleTxs.length;
+  if (txs.hasNextPage)
+    return await getAccountLevelAndMultiple(
+      address,
+      txs.nextCursor,
+      level,
+      multiple
+    );
+  return { level, multiple };
 };

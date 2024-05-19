@@ -3,29 +3,40 @@ import {
   getCurrentSui,
   getCurrentOcean,
   getLatestClaimTx as getLatestClaimDate,
+  getAccountLevelAndMultiple,
 } from "../utility/balance.js";
 import { getAccountList } from "../../config/account.js";
 var TWO_HOUR = 2 * 60 * 60 * 1000;
 async function refreshAddressStatus() {
   const accountList = await getAccountList();
-  console.log("fetching account status...");
   const accountData = await Promise.all(
     (
       await Promise.all(
         accountList.map(async ({ id, teleid, address, lv }, index) => {
-          const [sui, ocean] = await Promise.all([
+          const [sui, ocean, { level, multiple }] = await Promise.all([
             getCurrentSui(address),
             getCurrentOcean(address),
+            getAccountLevelAndMultiple(address),
           ]);
+          let ableToUpLvl = false;
+          switch (level) {
+            case 1:
+              if (ocean >= 20) ableToUpLvl = true;
+              break;
+            case 2:
+              if (ocean >= 100) ableToUpLvl = true;
+              break;
+          }
           return {
             index,
             id,
             teleid,
             address,
-            lv,
+            lv: level,
+            multiple,
             sui,
             ocean,
-            ableToUpLvl: lv == 1 && ocean >= 20,
+            ableToUpLvl,
           };
         })
       )
