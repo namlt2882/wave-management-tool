@@ -10,10 +10,15 @@ function onDataLoaded(addressStatusList) {
     totalUpLvl,
     totalLv1,
     totalLv2,
+    totalLv3,
+    totalMultiple1,
+    totalMultiple2,
+    totalMultiple3,
     totalSui,
     totalOcean,
+    claimPerHour
   } = addressStatusList.reduce(
-    (acc, { lv, sui, ocean, onTime, ableToUpLvl }) => {
+    (acc, { lv, multiple, sui, ocean, onTime, ableToUpLvl }) => {
       if (onTime) {
         acc.totalActive += 1;
       } else {
@@ -22,14 +27,34 @@ function onDataLoaded(addressStatusList) {
       if (ableToUpLvl) {
         acc.totalUpLvl += 1;
       }
+      let claimPerHour = 1;
       switch (lv) {
+        case 3:
+          acc.totalLv3 += 1;
+          claimPerHour = 2;
+          break;
         case 2:
           acc.totalLv2 += 1;
+          claimPerHour = 1.5;
           break;
         default:
           acc.totalLv1 += 1;
           break;
       }
+      switch (multiple) {
+        case 3:
+          acc.totalMultiple3 += 1;
+          claimPerHour *= 1.5;
+          break;
+        case 2:
+          acc.totalMultiple2 += 1;
+          claimPerHour *= 1.25;
+          break;
+        default:
+          acc.totalMultiple1 += 1;
+          break;
+      }
+      acc.claimPerHour += claimPerHour;
       acc.totalSui += sui;
       acc.totalOcean += ocean;
       return acc;
@@ -40,6 +65,11 @@ function onDataLoaded(addressStatusList) {
       totalUpLvl: 0,
       totalLv1: 0,
       totalLv2: 0,
+      totalLv3: 0,
+      totalMultiple1: 0,
+      totalMultiple2: 0,
+      totalMultiple3: 0,
+      claimPerHour: 0,
       totalSui: 0,
       totalOcean: 0,
     }
@@ -80,11 +110,29 @@ function onDataLoaded(addressStatusList) {
       </tr>
       <tr>
         <th>Số lượng mèo:</th>
-        <td>Lv2=${totalLv2} Lv1=${totalLv1} (Có thể nâng ${totalUpLvl} acc)</td>
+        <td>Lv3=${totalLv3} Lv2=${totalLv2} Lv1=${totalLv1} (Có thể nâng ${totalUpLvl} acc)</td>
+      </tr>
+      <tr>
+        <th>Số lượng cua:</th>
+        <td>Lv3=${totalMultiple3} Lv2=${totalMultiple2} Lv1=${totalMultiple1}</td>
       </tr>
       <tr>
         <th>Số lượng coin:</th>
         <td>SUI=${totalSui.toFixed(3)} OCEAN=${totalOcean.toFixed(3)}</td>
+      </tr>
+    </table>
+    <table>
+      <tr>
+        <th>Tổng sản lượng 1 giờ:</th>
+        <td>${claimPerHour.toFixed(2)} OCEAN</td>
+      </tr>
+      <tr>
+        <th>Tổng sản lượng 1 ngày:</th>
+        <td>${(claimPerHour * 24).toFixed(2)} OCEAN</td>
+      </tr>
+      <tr>
+        <th>Tổng sản lượng 1 tháng:</th>
+        <td>${(claimPerHour * 24 * 30).toFixed(2)} OCEAN</td>
       </tr>
     </table>
     `);

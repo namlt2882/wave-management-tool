@@ -13,11 +13,9 @@ async function refreshAddressStatus() {
     (
       await Promise.all(
         accountList.map(async ({ id, teleid, address }, index) => {
-          const [sui, ocean, { level, multiple }] = await Promise.all([
-            getCurrentSui(address),
-            getCurrentOcean(address),
-            getAccountLevelAndMultiple(address),
-          ]);
+          const sui = await getCurrentSui(address);
+          const ocean = await getCurrentOcean(address);
+          const { level, multiple } = await getAccountLevelAndMultiple(address);
           let ableToUpLvl = false;
           switch (level) {
             case 1:
