@@ -132,8 +132,6 @@ function renderResult(addressStatus) {
   return content;
 }
 
-setInterval(() => ipcRenderer.send("load-address-status"), 15 * 60 * 1000);
-
 var loadButton;
 $(function () {
   var area = $("#searchTimezone");

@@ -12,7 +12,7 @@ async function refreshAddressStatus() {
   const accountData = await Promise.all(
     (
       await Promise.all(
-        accountList.map(async ({ id, teleid, address, lv }, index) => {
+        accountList.map(async ({ id, teleid, address }, index) => {
           const [sui, ocean, { level, multiple }] = await Promise.all([
             getCurrentSui(address),
             getCurrentOcean(address),

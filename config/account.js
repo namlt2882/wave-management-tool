@@ -13,11 +13,10 @@ export const getAccountList = async () => {
   const [_, ...data] = addressCsv.split("\n");
   accountList = data
     .map((val) => val.split(","))
-    .map(([id, teleid, address, lv]) => ({
+    .map(([id, teleid, address]) => ({
       id: id.trim(),
       teleid: teleid.trim(),
       address: address.trim(),
-      lv: parseInt(lv.trim()),
     }));
   return accountList;
 };
