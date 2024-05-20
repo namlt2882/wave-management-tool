@@ -16,7 +16,7 @@ function onDataLoaded(addressStatusList) {
     totalMultiple3,
     totalSui,
     totalOcean,
-    claimPerHour
+    claimPerHour,
   } = addressStatusList.reduce(
     (acc, { lv, multiple, sui, ocean, onTime, ableToUpLvl }) => {
       if (onTime) {
@@ -164,8 +164,8 @@ function renderResult(addressStatus) {
   }
   var content = $(`<tr style="${style}">
   <td>${id}</td>
-  <td>${teleid}</td>
-  <td>${address} <i class="fa fa-copy"></i></td>
+  <td>${teleid} ${teleid ? `<i class="fa fa-copy teleid">` : ""}</td>
+  <td>${address} <i class="fa fa-copy address"></i></td>
   <td>${lv}</td>
   <td>${multiple}</td>
   <td>${sui.toFixed(3)}</td>
@@ -174,7 +174,10 @@ function renderResult(addressStatus) {
   <td>${onTime ? nextTimeStr : ""}</td>
   <td>${note}</td>
   </tr>`);
-  content.first(`i`).on("click", () => {
+  content.find(`i.teleid`).on("click", () => {
+    clipboard.writeText(teleid);
+  });
+  content.find(`i.address`).on("click", () => {
     clipboard.writeText(address);
   });
   return content;
