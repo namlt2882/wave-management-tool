@@ -123,3 +123,39 @@ export const getAccountLevelAndMultiple = async (
     );
   return { level, multiple };
 };
+
+export const getBoatLevel = async (address, cursor, boat = 1) => {
+  const txs = await client.queryTransactionBlocks({
+    limit: 500,
+    filter: {
+      FromAddress: address,
+    },
+    cursor,
+    options: {
+      showEvents: true,
+    },
+  });
+  const upgradeBoatTxs = txs.data.filter((block) => {
+    return block.events.find(
+      (event) =>
+        event.type == EVENT_TYPE_UPGRADE_LEVEL &&
+        event.transactionModule == "game" &&
+        event.parsedJson.type === 0
+    );
+  });
+  if (upgradeBoatTxs.length > 0) boat += upgradeBoatTxs.length;
+  if (txs.hasNextPage && cursor != txs.nextCursor)
+    return await getBoatLevel(address, txs.nextCursor, boat);
+  return boat;
+};
+
+export const getClaimHour = (boat = 1) => {
+  switch (boat) {
+    case 2:
+      return 3;
+    case 3:
+      return 4;
+    default:
+      return 2;
+  }
+};

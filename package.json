@@ -50,7 +50,7 @@
     "bootstrap": "4.3.1",
     "font-awesome": "4.7.0",
     "jquery": "3.4.1",
-    "lodash-es": "^4.17.21",
-    "node-fetch": "^3.3.2"
+    "node-fetch": "^3.3.2",
+    "semaphore": "^1.1.0"
   }
 }

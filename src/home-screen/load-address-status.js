@@ -11,6 +11,9 @@ function onDataLoaded(addressStatusList) {
     totalLv1,
     totalLv2,
     totalLv3,
+    totalBoatLv1,
+    totalBoatLv2,
+    totalBoatLv3,
     totalMultiple1,
     totalMultiple2,
     totalMultiple3,
@@ -18,7 +21,7 @@ function onDataLoaded(addressStatusList) {
     totalOcean,
     claimPerHour,
   } = addressStatusList.reduce(
-    (acc, { lv, multiple, sui, ocean, onTime, ableToUpLvl }) => {
+    (acc, { lv, boatLv, multiple, sui, ocean, onTime, ableToUpLvl }) => {
       if (onTime) {
         acc.totalActive += 1;
       } else {
@@ -39,6 +42,17 @@ function onDataLoaded(addressStatusList) {
           break;
         default:
           acc.totalLv1 += 1;
+          break;
+      }
+      switch (boatLv) {
+        case 3:
+          acc.totalBoatLv3 += 1;
+          break;
+        case 2:
+          acc.totalBoatLv2 += 1;
+          break;
+        default:
+          acc.totalBoatLv1 += 1;
           break;
       }
       switch (multiple) {
@@ -66,6 +80,9 @@ function onDataLoaded(addressStatusList) {
       totalLv1: 0,
       totalLv2: 0,
       totalLv3: 0,
+      totalBoatLv1: 0,
+      totalBoatLv2: 0,
+      totalBoatLv3: 0,
       totalMultiple1: 0,
       totalMultiple2: 0,
       totalMultiple3: 0,
@@ -87,6 +104,7 @@ function onDataLoaded(addressStatusList) {
         <th>Địa chỉ</th>
         <th>Level mèo</th>
         <th>Level cua</th>
+        <th>Level thuyền</th>
         <th>GAS</th>
         <th>OCEAN</th>
         <th>Claim lần cuối</th>
@@ -117,6 +135,10 @@ function onDataLoaded(addressStatusList) {
         <td>Lv3=${totalMultiple3} Lv2=${totalMultiple2} Lv1=${totalMultiple1}</td>
       </tr>
       <tr>
+        <th>Số lượng thuyền:</th>
+        <td>Lv3=${totalBoatLv3} Lv2=${totalBoatLv2} Lv1=${totalBoatLv1}</td>
+      </tr>
+      <tr>
         <th>Số lượng coin:</th>
         <td>SUI=${totalSui.toFixed(3)} OCEAN=${totalOcean.toFixed(3)}</td>
       </tr>
@@ -145,6 +167,7 @@ function renderResult(addressStatus) {
     teleid,
     address,
     lv,
+    boatLv,
     multiple,
     sui,
     ocean,
@@ -168,6 +191,7 @@ function renderResult(addressStatus) {
   <td>${address} <i class="fa fa-copy address"></i></td>
   <td>${lv}</td>
   <td>${multiple}</td>
+  <td>${boatLv}</td>
   <td>${sui.toFixed(3)}</td>
   <td>${ocean.toFixed(3)}</td>
   <td>${lastClaimDateStr}</td>
