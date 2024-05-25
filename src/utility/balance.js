@@ -114,7 +114,7 @@ export const getAccountLevelAndMultiple = async (
     );
   });
   if (upgradeMultipleTxs.length > 0) multiple += upgradeMultipleTxs.length;
-  if (txs.hasNextPage)
+  if (txs.hasNextPage && cursor != txs.nextCursor)
     return await getAccountLevelAndMultiple(
       address,
       txs.nextCursor,
