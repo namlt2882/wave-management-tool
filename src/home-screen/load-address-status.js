@@ -11,6 +11,9 @@ function onDataLoaded(addressStatusList) {
     totalLv1,
     totalLv2,
     totalLv3,
+    totalLv4,
+    totalLv5,
+    totalLv6,
     totalBoatLv1,
     totalBoatLv2,
     totalBoatLv3,
@@ -30,15 +33,27 @@ function onDataLoaded(addressStatusList) {
       if (ableToUpLvl) {
         acc.totalUpLvl += 1;
       }
-      let claimPerHour = 1;
+      let claimPerHour = 0.5;
       switch (lv) {
+        case 6:
+          acc.totalLv6 += 1;
+          claimPerHour = 1.75;
+          break;
+        case 5:
+          acc.totalLv5 += 1;
+          claimPerHour = 1.5;
+          break;
+        case 4:
+          acc.totalLv4 += 1;
+          claimPerHour = 1.25;
+          break;
         case 3:
           acc.totalLv3 += 1;
-          claimPerHour = 2;
+          claimPerHour = 1;
           break;
         case 2:
           acc.totalLv2 += 1;
-          claimPerHour = 1.5;
+          claimPerHour = 0.75;
           break;
         default:
           acc.totalLv1 += 1;
@@ -80,6 +95,9 @@ function onDataLoaded(addressStatusList) {
       totalLv1: 0,
       totalLv2: 0,
       totalLv3: 0,
+      totalLv4: 0,
+      totalLv5: 0,
+      totalLv6: 0,
       totalBoatLv1: 0,
       totalBoatLv2: 0,
       totalBoatLv3: 0,
@@ -128,7 +146,7 @@ function onDataLoaded(addressStatusList) {
       </tr>
       <tr>
         <th>Số lượng mèo:</th>
-        <td>Lv3=${totalLv3} Lv2=${totalLv2} Lv1=${totalLv1} (Có thể nâng ${totalUpLvl} acc)</td>
+        <td>Lv6=${totalLv6} Lv5=${totalLv5} Lv4=${totalLv4}<br/> Lv3=${totalLv3} Lv2=${totalLv2} Lv1=${totalLv1} (Có thể nâng ${totalUpLvl} acc)</td>
       </tr>
       <tr>
         <th>Số lượng cua:</th>
