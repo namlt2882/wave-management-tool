@@ -17,6 +17,9 @@ function onDataLoaded(addressStatusList) {
     totalBoatLv1,
     totalBoatLv2,
     totalBoatLv3,
+    totalBoatLv4,
+    totalBoatLv5,
+    totalBoatLv6,
     totalMultiple1,
     totalMultiple2,
     totalMultiple3,
@@ -60,6 +63,15 @@ function onDataLoaded(addressStatusList) {
           break;
       }
       switch (boatLv) {
+        case 6:
+          acc.totalBoatLv6 += 1;
+          break;
+        case 5:
+          acc.totalBoatLv5 += 1;
+          break;
+        case 4:
+          acc.totalBoatLv4 += 1;
+          break;
         case 3:
           acc.totalBoatLv3 += 1;
           break;
@@ -101,6 +113,9 @@ function onDataLoaded(addressStatusList) {
       totalBoatLv1: 0,
       totalBoatLv2: 0,
       totalBoatLv3: 0,
+      totalBoatLv4: 0,
+      totalBoatLv5: 0,
+      totalBoatLv6: 0,
       totalMultiple1: 0,
       totalMultiple2: 0,
       totalMultiple3: 0,
@@ -154,7 +169,7 @@ function onDataLoaded(addressStatusList) {
       </tr>
       <tr>
         <th>Số lượng thuyền:</th>
-        <td>Lv3=${totalBoatLv3} Lv2=${totalBoatLv2} Lv1=${totalBoatLv1}</td>
+        <td>Lv6=${totalBoatLv6} Lv5=${totalBoatLv5} Lv4=${totalBoatLv4}<br/>Lv3=${totalBoatLv3} Lv2=${totalBoatLv2} Lv1=${totalBoatLv1}</td>
       </tr>
       <tr>
         <th>Số lượng coin:</th>
