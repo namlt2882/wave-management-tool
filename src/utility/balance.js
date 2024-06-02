@@ -31,7 +31,7 @@ export const getCoinType = async (
   const coins = await client.getCoins({
     owner: address,
     cursor: nextCursor,
-    limit: 500,
+    limit: 50,
     coinType: coinType,
   });
   return coins.data;
@@ -41,7 +41,7 @@ export const getAllCoin = async (address, nextCursor = undefined) => {
   const coins = await client.getAllCoins({
     owner: address,
     cursor: nextCursor,
-    limit: 500,
+    limit: 50,
   });
   return coins;
 };
@@ -49,7 +49,7 @@ export const getAllCoin = async (address, nextCursor = undefined) => {
 export const getCoin = async (address) => {
   const coins = await client.getCoins({
     owner: address,
-    limit: 500,
+    limit: 50,
   });
   return coins.data;
 };
@@ -88,7 +88,7 @@ export const getAccountLevelAndMultiple = async (
   multiple = 1
 ) => {
   const txs = await client.queryTransactionBlocks({
-    limit: 500,
+    limit: 50,
     filter: {
       FromAddress: address,
     },
@@ -98,7 +98,7 @@ export const getAccountLevelAndMultiple = async (
     },
   });
   const upgradeLevelTxs = txs.data.filter((block) => {
-    return block.events.find(
+    return block.events?.find(
       (event) =>
         event.type == EVENT_TYPE_UPGRADE_LEVEL &&
         event.transactionModule == "game" &&
@@ -126,7 +126,7 @@ export const getAccountLevelAndMultiple = async (
 
 export const getBoatLevel = async (address, cursor, boat = 1) => {
   const txs = await client.queryTransactionBlocks({
-    limit: 500,
+    limit: 50,
     filter: {
       FromAddress: address,
     },
