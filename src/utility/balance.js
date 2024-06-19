@@ -1,8 +1,8 @@
 import {
-  EVENT_TYPE_UPGRADE_LEVEL,
   OCEAN_COINTYPE,
   SUI_COINTYPE,
   client,
+  GAME_SHARE_OBJECT_ID
 } from "../../config/network.js";
 
 export const getBalance = async (address, coinType) => {
@@ -67,7 +67,7 @@ export const getLatestClaimTx = async (address, cursor) => {
   });
   const filterData = tx.data
     .filter((block) => {
-      return block.balanceChanges.find(
+      return block.balanceChanges?.find(
         (balance) =>
           balance.owner.AddressOwner == address &&
           balance.coinType == OCEAN_COINTYPE &&
@@ -83,70 +83,19 @@ export const getLatestClaimTx = async (address, cursor) => {
 
 export const getAccountLevelAndMultiple = async (
   address,
-  cursor,
-  level = 1,
-  multiple = 1
 ) => {
-  const txs = await client.queryTransactionBlocks({
-    limit: 50,
-    filter: {
-      FromAddress: address,
-    },
-    cursor,
-    options: {
-      showEvents: true,
-    },
+  const result = await client.getDynamicFieldObject({
+    parentId: GAME_SHARE_OBJECT_ID,
+    name: {
+      type: "address",
+      value: address
+    }
   });
-  const upgradeLevelTxs = txs.data.filter((block) => {
-    return block.events?.find(
-      (event) =>
-        event.type == EVENT_TYPE_UPGRADE_LEVEL &&
-        event.transactionModule == "game" &&
-        event.parsedJson.type === 1
-    );
-  });
-  if (upgradeLevelTxs.length > 0) level += upgradeLevelTxs.length;
-  const upgradeMultipleTxs = txs.data.filter((block) => {
-    return block.events.find(
-      (event) =>
-        event.type == EVENT_TYPE_UPGRADE_LEVEL &&
-        event.transactionModule == "box"
-    );
-  });
-  if (upgradeMultipleTxs.length > 0) multiple += upgradeMultipleTxs.length;
-  if (txs.hasNextPage && cursor != txs.nextCursor)
-    return await getAccountLevelAndMultiple(
-      address,
-      txs.nextCursor,
-      level,
-      multiple
-    );
-  return { level, multiple };
-};
-
-export const getBoatLevel = async (address, cursor, boat = 1) => {
-  const txs = await client.queryTransactionBlocks({
-    limit: 50,
-    filter: {
-      FromAddress: address,
-    },
-    cursor,
-    options: {
-      showEvents: true,
-    },
-  });
-  const upgradeBoatTxs = txs.data.filter((block) => {
-    return block.events.find(
-      (event) =>
-        event.type == EVENT_TYPE_UPGRADE_LEVEL &&
-        event.transactionModule == "game" &&
-        event.parsedJson.type === 0
-    );
-  });
-  if (upgradeBoatTxs.length > 0) boat += upgradeBoatTxs.length;
-  if (txs.hasNextPage && cursor != txs.nextCursor)
-    return await getBoatLevel(address, txs.nextCursor, boat);
-  return boat;
+  if (!result?.data?.content?.fields) {
+    return { level: 1, multiple: 1, boat: 1 };
+  }
+  const {boat, mesh, seafood} = result.data.content.fields
+  return { level: mesh + 1, multiple: seafood + 1, boat: boat + 1 };
 };
 
 export const getClaimHour = (boat = 1) => {
