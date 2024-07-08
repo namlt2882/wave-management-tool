@@ -56,30 +56,33 @@ export const getCoin = async (address) => {
 
 export const getLatestClaimTx = async (address, cursor) => {
   const tx = await client.queryTransactionBlocks({
-    limit: 10,
+    limit: 50,
     cursor,
     filter: {
       FromAddress: address,
     },
     options: {
-      showBalanceChanges: true,
+      showEvents: true,
+      showEffects: true,
     },
   });
   const filterData = tx.data
-    .filter((block) => {
-      return block.balanceChanges?.find(
-        (balance) =>
-          balance.owner.AddressOwner == address &&
-          balance.coinType == OCEAN_COINTYPE &&
-          parseInt(balance.amount) >= 1 * 1_000_000_000
-      );
-    })
+    .filter((block) => isClaimTx(block, address))
     .sort((a, b) => parseInt(b.timestampMs) - parseInt(a.timestampMs));
   if (filterData.length > 0)
     return new Date(parseInt(filterData[0].timestampMs));
   if (tx.hasNextPage) return await getLatestClaimTx(address, tx.nextCursor);
   return null;
 };
+
+export const isClaimTx = (block, ownerAddress) =>
+  block.effects?.status?.status == "success" &&
+  block.events.find(
+    (event) =>
+      event.sender == ownerAddress &&
+      event.type ==
+      "0x1efaf509c9b7e986ee724596f526a22b474b15c376136772c00b8452f204d2d1::game::ClaimToken"
+  );
 
 export const getAccountLevelAndMultiple = async (
   address,
@@ -94,7 +97,7 @@ export const getAccountLevelAndMultiple = async (
   if (!result?.data?.content?.fields) {
     return { level: 1, multiple: 1, boat: 1 };
   }
-  const {boat, mesh, seafood} = result.data.content.fields
+  const { boat, mesh, seafood } = result.data.content.fields
   return { level: mesh + 1, multiple: seafood + 1, boat: boat + 1 };
 };
 
