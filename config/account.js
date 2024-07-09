@@ -14,9 +14,9 @@ export const getAccountList = async () => {
   accountList = data
     .map((val) => val.split(","))
     .map(([id, teleid, address]) => ({
-      id: id.trim(),
-      teleid: teleid.trim(),
-      address: address.trim(),
+      id: id?.trim(),
+      teleid: teleid?.trim(),
+      address: address?.trim(),
     }));
   return accountList;
 };
