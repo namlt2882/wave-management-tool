@@ -16,7 +16,8 @@ async function refreshAddressStatus() {
       (
         await Promise.all(
           accountList.map(async ({ id, teleid, address }) => {
-            const [sui, ocean, { level, multiple, boat: boatLevel }] =
+            try {
+              const [sui, ocean, { level, multiple, boat: boatLevel }] =
               await Promise.all([
                 exec(() => getCurrentSui(address)),
                 exec(() => getCurrentOcean(address)),
@@ -43,9 +44,14 @@ async function refreshAddressStatus() {
               ocean,
               ableToUpLvl,
             };
+            } catch(e) {
+              console.error(`${id} ${address} ${e?.message}`)
+            }
+            return null
           })
         )
       )
+        .filter((val) => val)
         .filter((val) => val.sui != 0 || val.ocean != 0)
         .map(async (val) => {
           val.lastClaimDate = await exec(() => getLatestClaimDate(val.address));
