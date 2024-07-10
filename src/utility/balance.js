@@ -77,7 +77,7 @@ export const getLatestClaimTx = async (address, cursor) => {
 
 export const isClaimTx = (block, ownerAddress) =>
   block.effects?.status?.status == "success" &&
-  block.events.find(
+  block.events?.find(
     (event) =>
       event.sender == ownerAddress &&
       event.type ==
