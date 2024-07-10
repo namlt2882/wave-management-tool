@@ -8,6 +8,10 @@ import {
 } from "../utility/balance.js";
 import { getAccountList, isBankAccount } from "../../config/account.js";
 import exec from "../utility/worker.js";
+import { newSemaphore } from "../utility/semaphore.js";
+
+const MAX_RETRY = 3;
+const { exec: reqExec } = newSemaphore(5)
 
 async function refreshAddressStatus() {
   const accountList = await getAccountList();
@@ -15,46 +19,50 @@ async function refreshAddressStatus() {
     await Promise.all(
       (
         await Promise.all(
-          accountList.map(async ({ id, teleid, address }) => {
-            try {
-              const [sui, ocean, { level, multiple, boat: boatLevel }] =
-              await Promise.all([
-                exec(() => getCurrentSui(address)),
-                exec(() => getCurrentOcean(address)),
-                exec(() => getAccountLevelAndMultiple(address)),
-              ]);
-            let ableToUpLvl = false;
-            switch (level) {
-              case 1:
-                if (ocean >= 20) ableToUpLvl = true;
-                break;
-              case 2:
-                if (ocean >= 100) ableToUpLvl = true;
-                break;
-            }
-            return {
-              id,
-              teleid,
-              address,
-              lv: level,
-              boatLv: boatLevel,
-              claimHour: getClaimHour(boatLevel),
-              multiple,
-              sui,
-              ocean,
-              ableToUpLvl,
-            };
-            } catch(e) {
-              console.error(`${id} ${address} ${e?.message}`)
+          accountList.map(({ id, teleid, address }) => exec(async () => {
+            let retry = 1;
+            while (retry < MAX_RETRY) {
+              try {
+                const [sui, ocean, { level, multiple, boat: boatLevel }] =
+                  await Promise.all([
+                    reqExec(() => getCurrentSui(address)),
+                    reqExec(() => getCurrentOcean(address)),
+                    reqExec(() => getAccountLevelAndMultiple(address)),
+                  ]);
+                let ableToUpLvl = false;
+                switch (level) {
+                  case 1:
+                    if (ocean >= 20) ableToUpLvl = true;
+                    break;
+                  case 2:
+                    if (ocean >= 100) ableToUpLvl = true;
+                    break;
+                }
+                return {
+                  id,
+                  teleid,
+                  address,
+                  lv: level,
+                  boatLv: boatLevel,
+                  claimHour: getClaimHour(boatLevel),
+                  multiple,
+                  sui,
+                  ocean,
+                  ableToUpLvl,
+                };
+              } catch (e) {
+                console.error(`${id} ${address} ${e?.message}`)
+                retry++
+              }
             }
             return null
-          })
+          }))
         )
       )
         .filter((val) => val)
         .filter((val) => val.sui != 0 || val.ocean != 0)
         .map(async (val) => {
-          val.lastClaimDate = await exec(() => getLatestClaimDate(val.address));
+          val.lastClaimDate = await reqExec(() => getLatestClaimDate(val.address));
           if (val.lastClaimDate) {
             val.lastClaimDateStr = val.lastClaimDate.toLocaleString();
             val.nextTime = new Date(val.lastClaimDate);
