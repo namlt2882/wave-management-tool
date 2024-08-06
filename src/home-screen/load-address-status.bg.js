@@ -11,7 +11,7 @@ import exec from "../utility/worker.js";
 import { newSemaphore } from "../utility/semaphore.js";
 
 const MAX_RETRY = 3;
-const { exec: reqExec } = newSemaphore(5)
+const { exec: reqExec } = newSemaphore(4)
 
 async function refreshAddressStatus() {
   const accountList = await getAccountList();
@@ -23,20 +23,23 @@ async function refreshAddressStatus() {
             let retry = 1;
             while (retry < MAX_RETRY) {
               try {
-                const [sui, ocean, { level, multiple, boat: boatLevel }] =
+                const [sui, ocean, { level, multiple, boat: boatLevel, exist }] =
                   await Promise.all([
                     reqExec(() => getCurrentSui(address)),
                     reqExec(() => getCurrentOcean(address)),
                     reqExec(() => getAccountLevelAndMultiple(address)),
                   ]);
+                if (!exist && sui == 0 && ocean == 0 && !isBankAccount(address)) return null;
                 let ableToUpLvl = false;
-                switch (level) {
-                  case 1:
-                    if (ocean >= 20) ableToUpLvl = true;
-                    break;
-                  case 2:
-                    if (ocean >= 100) ableToUpLvl = true;
-                    break;
+                if (exist) {
+                  switch (level) {
+                    case 1:
+                      if (ocean >= 20) ableToUpLvl = true;
+                      break;
+                    case 2:
+                      if (ocean >= 100) ableToUpLvl = true;
+                      break;
+                  }
                 }
                 return {
                   id,
@@ -49,6 +52,7 @@ async function refreshAddressStatus() {
                   sui,
                   ocean,
                   ableToUpLvl,
+                  exist,
                 };
               } catch (e) {
                 console.error(`${id} ${address} ${e?.message}`)
@@ -62,7 +66,9 @@ async function refreshAddressStatus() {
         .filter((val) => val)
         .filter((val) => val.sui != 0 || val.ocean != 0)
         .map(async (val) => {
-          val.lastClaimDate = await reqExec(() => getLatestClaimDate(val.address));
+          if (val.exist) {
+            val.lastClaimDate = await reqExec(() => getLatestClaimDate(val.address));
+          }
           if (val.lastClaimDate) {
             val.lastClaimDateStr = val.lastClaimDate.toLocaleString();
             val.nextTime = new Date(val.lastClaimDate);

@@ -95,10 +95,10 @@ export const getAccountLevelAndMultiple = async (
     }
   });
   if (!result?.data?.content?.fields) {
-    return { level: 1, multiple: 1, boat: 1 };
+    return { level: 1, multiple: 1, boat: 1, exist: false };
   }
   const { boat, mesh, seafood } = result.data.content.fields
-  return { level: mesh + 1, multiple: seafood + 1, boat: boat + 1 };
+  return { level: mesh + 1, multiple: seafood + 1, boat: boat + 1, exist: true };
 };
 
 export const getClaimHour = (boat = 1) => {
