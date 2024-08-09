@@ -11,7 +11,11 @@ import exec from "../utility/worker.js";
 import { newSemaphore } from "../utility/semaphore.js";
 
 const MAX_RETRY = 3;
-const { exec: reqExec } = newSemaphore(4)
+const { exec: reqExec } = newSemaphore(4);
+
+function getRandomArbitrary(min, max) {
+  return Math.random() * (max - min) + min;
+}
 
 async function refreshAddressStatus() {
   const accountList = await getAccountList();
@@ -20,14 +24,14 @@ async function refreshAddressStatus() {
       (
         await Promise.all(
           accountList.map(({ id, teleid, address }) => exec(async () => {
-            let retry = 1;
+            let retry = 0;
             while (retry < MAX_RETRY) {
               try {
                 const [sui, ocean, { level, multiple, boat: boatLevel, exist }] =
                   await Promise.all([
                     reqExec(() => getCurrentSui(address)),
                     reqExec(() => getCurrentOcean(address)),
-                    reqExec(() => getAccountLevelAndMultiple(address)),
+                    reqExec(() => getAccountLevelAndMultiple(address), 2),
                   ]);
                 if (!exist && sui == 0 && ocean == 0 && !isBankAccount(address)) return null;
                 let ableToUpLvl = false;
@@ -55,6 +59,7 @@ async function refreshAddressStatus() {
                   exist,
                 };
               } catch (e) {
+                await new Promise(resolve => setTimeout(resolve, getRandomArbitrary(100, 500)))
                 console.error(`${id} ${address} ${e?.message}`)
                 retry++
               }
@@ -67,7 +72,7 @@ async function refreshAddressStatus() {
         .filter((val) => val.sui != 0 || val.ocean != 0)
         .map(async (val) => {
           if (val.exist) {
-            val.lastClaimDate = await reqExec(() => getLatestClaimDate(val.address));
+            val.lastClaimDate = await reqExec(() => getLatestClaimDate(val.address), 3);
           }
           if (val.lastClaimDate) {
             val.lastClaimDateStr = val.lastClaimDate.toLocaleString();
