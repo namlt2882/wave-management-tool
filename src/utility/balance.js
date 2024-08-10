@@ -54,9 +54,10 @@ export const getCoin = async (address) => {
   return coins.data;
 };
 
-export const getLatestClaimTx = async (address, cursor) => {
+export const getLatestClaimTx = async (address, cursor, initLimit = 5) => {
+  if (initLimit > 50) initLimit = 50
   const tx = await client.queryTransactionBlocks({
-    limit: 50,
+    limit: initLimit,
     cursor,
     filter: {
       FromAddress: address,
@@ -71,7 +72,7 @@ export const getLatestClaimTx = async (address, cursor) => {
     .sort((a, b) => parseInt(b.timestampMs) - parseInt(a.timestampMs));
   if (filterData.length > 0)
     return new Date(parseInt(filterData[0].timestampMs));
-  if (tx.hasNextPage) return await getLatestClaimTx(address, tx.nextCursor);
+  if (tx.hasNextPage) return await getLatestClaimTx(address, tx.nextCursor, initLimit * 10);
   return null;
 };
 

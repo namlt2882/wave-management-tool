@@ -11,7 +11,7 @@ import exec from "../utility/worker.js";
 import { newSemaphore } from "../utility/semaphore.js";
 
 const MAX_RETRY = 3;
-const { exec: reqExec } = newSemaphore(4);
+const { exec: reqExec } = newSemaphore(5);
 
 function getRandomArbitrary(min, max) {
   return Math.random() * (max - min) + min;
@@ -23,56 +23,83 @@ async function refreshAddressStatus() {
     await Promise.all(
       (
         await Promise.all(
-          accountList.map(({ id, teleid, address }) => exec(async () => {
-            let retry = 0;
-            while (retry < MAX_RETRY) {
-              try {
-                const [sui, ocean, { level, multiple, boat: boatLevel, exist }] =
-                  await Promise.all([
+          accountList.map(({ id, teleid, address }) =>
+            exec(async () => {
+              let retry = 0;
+              while (retry < MAX_RETRY) {
+                try {
+                  console.log("get data " + address)
+                  const [
+                    sui,
+                    ocean,
+                    { level, multiple, boat: boatLevel, exist },
+                  ] = await Promise.all([
                     reqExec(() => getCurrentSui(address)),
                     reqExec(() => getCurrentOcean(address)),
                     reqExec(() => getAccountLevelAndMultiple(address), 2),
                   ]);
-                if (!exist && sui == 0 && ocean == 0 && !isBankAccount(address)) return null;
-                let ableToUpLvl = false;
-                if (exist) {
-                  switch (level) {
-                    case 1:
-                      if (ocean >= 20) ableToUpLvl = true;
-                      break;
-                    case 2:
-                      if (ocean >= 100) ableToUpLvl = true;
-                      break;
+                  if (
+                    !exist &&
+                    sui == 0 &&
+                    ocean == 0 &&
+                    !isBankAccount(address)
+                  )
+                    return null;
+                  let ableToUpLvl = false;
+                  if (exist) {
+                    switch (level) {
+                      case 1:
+                        if (ocean >= 20) ableToUpLvl = true;
+                        break;
+                      case 2:
+                        if (ocean >= 100) ableToUpLvl = true;
+                        break;
+                    }
                   }
+                  return {
+                    id,
+                    teleid,
+                    address,
+                    lv: level,
+                    boatLv: boatLevel,
+                    claimHour: getClaimHour(boatLevel),
+                    multiple,
+                    sui,
+                    ocean,
+                    ableToUpLvl,
+                    exist,
+                  };
+                } catch (e) {
+                  await new Promise((resolve) =>
+                    setTimeout(resolve, getRandomArbitrary(100, 500))
+                  );
+                  console.error(`${id} ${address} ${e?.message}`);
+                  retry++;
                 }
-                return {
-                  id,
-                  teleid,
-                  address,
-                  lv: level,
-                  boatLv: boatLevel,
-                  claimHour: getClaimHour(boatLevel),
-                  multiple,
-                  sui,
-                  ocean,
-                  ableToUpLvl,
-                  exist,
-                };
-              } catch (e) {
-                await new Promise(resolve => setTimeout(resolve, getRandomArbitrary(100, 500)))
-                console.error(`${id} ${address} ${e?.message}`)
-                retry++
               }
-            }
-            return null
-          }))
+              return null;
+            })
+          )
         )
       )
         .filter((val) => val)
         .filter((val) => val.sui != 0 || val.ocean != 0)
         .map(async (val) => {
           if (val.exist) {
-            val.lastClaimDate = await reqExec(() => getLatestClaimDate(val.address), 3);
+            let retry = 0;
+            while (retry < MAX_RETRY) {
+              try {
+                console.log("getLatestClaimDate " + val.address)
+                val.lastClaimDate = await reqExec(
+                  () => getLatestClaimDate(val.address),
+                  1.5
+                );
+                break
+              } catch (e) {
+                console.error(`${val.id} ${val.address} ${e?.message}`);
+                retry++;
+              }
+            }
           }
           if (val.lastClaimDate) {
             val.lastClaimDateStr = val.lastClaimDate.toLocaleString();
