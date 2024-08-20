@@ -23,7 +23,7 @@ export const getAccountList = async () => {
 
 export const isAccountDied = (address) => dieList.find((val) => val == address);
 export const isBankAccount = (adddress) =>
-  ["0", "a0", "b0", "c0", "d0", "e0", "f0", "g0", "h0", "i0", "bank11"].find((ba) => ba == adddress);
+  ["0", "a0", "b0", "c0", "d0", "e0", "f0", "g0", "h0", "i0", "j0", "bank11"].find((ba) => ba == adddress);
 export const MIN_SUI_PER_ACCOUNT = 0.015;
 export const AIRDROP_SUI_PER_ACCOUNT = 0.1;
 export const MIN_OCEAN_TO_SWAP = 1;
