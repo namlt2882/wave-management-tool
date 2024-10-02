@@ -40,7 +40,7 @@ function onDataLoaded(addressStatusList) {
       switch (lv) {
         case 6:
           acc.totalLv6 += 1;
-          claimPerHour = 1.75;
+          claimPerHour = 2.5;
           break;
         case 5:
           acc.totalLv5 += 1;
