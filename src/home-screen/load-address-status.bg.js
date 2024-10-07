@@ -10,7 +10,7 @@ import exec from "../utility/worker.js";
 import { newSemaphore } from "../utility/semaphore.js";
 
 const MAX_RETRY = 3;
-const { exec: reqExec } = newSemaphore(5);
+const { exec: reqExec } = newSemaphore(4);
 
 function getRandomArbitrary(min, max) {
   return Math.random() * (max - min) + min;
