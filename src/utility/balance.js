@@ -54,52 +54,24 @@ export const getCoin = async (address) => {
   return coins.data;
 };
 
-export const getLatestClaimTx = async (address, cursor, initLimit = 5) => {
-  if (initLimit > 50) initLimit = 50
-  const tx = await client.queryTransactionBlocks({
-    limit: initLimit,
-    cursor,
-    filter: {
-      FromAddress: address,
-    },
-    options: {
-      showEvents: true,
-      showEffects: true,
-    },
-  });
-  const filterData = tx.data
-    .filter((block) => isClaimTx(block, address))
-    .sort((a, b) => parseInt(b.timestampMs) - parseInt(a.timestampMs));
-  if (filterData.length > 0)
-    return new Date(parseInt(filterData[0].timestampMs));
-  if (tx.hasNextPage) return await getLatestClaimTx(address, tx.nextCursor, initLimit * 10);
-  return null;
-};
-
-export const isClaimTx = (block, ownerAddress) =>
-  block.effects?.status?.status == "success" &&
-  block.events?.find(
-    (event) =>
-      event.sender == ownerAddress &&
-      event.type ==
-      "0x1efaf509c9b7e986ee724596f526a22b474b15c376136772c00b8452f204d2d1::game::ClaimToken"
-  );
-
-export const getAccountLevelAndMultiple = async (
-  address,
-) => {
+export const getAccountLevelAndMultiple = async (address) => {
   const result = await client.getDynamicFieldObject({
     parentId: GAME_SHARE_OBJECT_ID,
     name: {
       type: "address",
-      value: address
-    }
+      value: address,
+    },
   });
-  if (!result?.data?.content?.fields) {
-    return { level: 1, multiple: 1, boat: 1, exist: false };
+  if (result?.error?.code == "dynamicFieldNotFound") {
+    return { level: 1, multiple: 1, boat: 1, exist: false, lastClaim: null };
   }
-  const { boat, mesh, seafood } = result.data.content.fields
-  return { level: mesh + 1, multiple: seafood + 1, boat: boat + 1, exist: true };
+  if (result?.error) {
+    throw new Error(result?.error?.code);
+  }
+  const { boat, mesh, seafood, last_claim } = result.data.content.fields;
+  response = { level: mesh + 1, multiple: seafood + 1, boat: boat + 1, exist: true, lastClaim: parseInt(last_claim) };
+
+  return response;
 };
 
 export const getClaimHour = (boat = 1) => {

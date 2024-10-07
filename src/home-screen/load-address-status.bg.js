@@ -2,7 +2,6 @@ import { ipcMain } from "electron";
 import {
   getCurrentSui,
   getCurrentOcean,
-  getLatestClaimTx as getLatestClaimDate,
   getAccountLevelAndMultiple,
   getClaimHour,
 } from "../utility/balance.js";
@@ -32,7 +31,7 @@ async function refreshAddressStatus() {
                   const [
                     sui,
                     ocean,
-                    { level, multiple, boat: boatLevel, exist },
+                    { level, multiple, boat: boatLevel, exist, lastClaim },
                   ] = await Promise.all([
                     reqExec(() => getCurrentSui(address)),
                     reqExec(() => getCurrentOcean(address)),
@@ -63,6 +62,7 @@ async function refreshAddressStatus() {
                     lv: level,
                     boatLv: boatLevel,
                     claimHour: getClaimHour(boatLevel),
+                    lastClaimDate: lastClaim ? new Date(lastClaim) : null,
                     multiple,
                     sui,
                     ocean,
@@ -85,22 +85,6 @@ async function refreshAddressStatus() {
         .filter((val) => val)
         .filter((val) => val.sui != 0 || val.ocean != 0)
         .map(async (val) => {
-          if (val.exist) {
-            let retry = 0;
-            while (retry < MAX_RETRY) {
-              try {
-                console.log("getLatestClaimDate " + val.address)
-                val.lastClaimDate = await reqExec(
-                  () => getLatestClaimDate(val.address),
-                  1.5
-                );
-                break
-              } catch (e) {
-                console.error(`${val.id} ${val.address} ${e?.message}`);
-                retry++;
-              }
-            }
-          }
           if (val.lastClaimDate) {
             val.lastClaimDateStr = val.lastClaimDate.toLocaleString();
             val.nextTime = new Date(val.lastClaimDate);
