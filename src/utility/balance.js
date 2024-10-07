@@ -69,9 +69,7 @@ export const getAccountLevelAndMultiple = async (address) => {
     throw new Error(result?.error?.code);
   }
   const { boat, mesh, seafood, last_claim } = result.data.content.fields;
-  response = { level: mesh + 1, multiple: seafood + 1, boat: boat + 1, exist: true, lastClaim: parseInt(last_claim) };
-
-  return response;
+  return { level: mesh + 1, multiple: seafood + 1, boat: boat + 1, exist: true, lastClaim: parseInt(last_claim) };
 };
 
 export const getClaimHour = (boat = 1) => {

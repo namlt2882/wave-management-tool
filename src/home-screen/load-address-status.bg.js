@@ -10,7 +10,7 @@ import exec from "../utility/worker.js";
 import { newSemaphore } from "../utility/semaphore.js";
 
 const MAX_RETRY = 3;
-const { exec: reqExec } = newSemaphore(4);
+const { exec: reqExec } = newSemaphore(2);
 
 function getRandomArbitrary(min, max) {
   return Math.random() * (max - min) + min;
@@ -35,7 +35,7 @@ async function refreshAddressStatus() {
                   ] = await Promise.all([
                     reqExec(() => getCurrentSui(address)),
                     reqExec(() => getCurrentOcean(address)),
-                    reqExec(() => getAccountLevelAndMultiple(address), 2),
+                    reqExec(() => getAccountLevelAndMultiple(address), 1.5),
                   ]);
                   if (
                     !exist &&
@@ -73,6 +73,7 @@ async function refreshAddressStatus() {
                   await new Promise((resolve) =>
                     setTimeout(resolve, getRandomArbitrary(100, 500))
                   );
+                  console.error(e)
                   console.error(`${id} ${address} ${e?.message}`);
                   retry++;
                 }

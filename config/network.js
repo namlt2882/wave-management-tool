@@ -1,7 +1,7 @@
 import { getFullnodeUrl, SuiClient } from "@mysten/sui.js/client";
 
-// const rpcUrl = getFullnodeUrl("mainnet");
-const rpcUrl = "https://sui-mainnet.public.blastapi.io";
+const rpcUrl = getFullnodeUrl("mainnet");
+// const rpcUrl = "https://sui-mainnet.public.blastapi.io";
 
 export const client = new SuiClient({ url: rpcUrl });
 export const SUI_COINTYPE = "0x2::sui::SUI";
